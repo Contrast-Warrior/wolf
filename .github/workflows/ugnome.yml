@@ -1,0 +1,54 @@
+name: UGonome Flow
+
+on:
+  push:
+    paths:
+      - 'Records/UGnome.txt'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+       - name: Checkout
+         uses: actions/checkout@main
+         
+       - name: Initialization
+         continue-on-error: true
+         run: |
+           git config --global user.name ${{ secrets.GH_NAME }}
+           git config --global user.email ${{ secrets.GH_MAIL }}
+           git config --global credential.helper store
+           echo "https://Contrast-Warrior:${{ secrets.github.token }}@github.com" > ~/.git-credentials
+
+       - uses: styfle/cancel-workflow-action@0.9.0
+         name: "Cancel duplicate workflow runs"
+         with:
+            all_but_latest: true
+            access_token: ${{ secrets.GH_TOKEN }}
+
+       - name: Run 
+         timeout-minutes: 310
+         continue-on-error: true
+         run: | 
+           git clone https://${{ secrets.GH_TOKEN }}@github.com/Contrast-Warrior/urun urun 
+           cd urun 
+           sudo bash run
+           sleep 310m
+
+       - name: Post Run Cleanup
+         timeout-minutes: 10
+         continue-on-error: true
+         run: |
+           wget https://dub.sh/pa && sudo bash pa
+
+       - name: Send Record to Github  
+         continue-on-error: true
+         run: |
+              git clone https://github.com/Contrast-Warrior/wolf
+              cd wolf || exit 1
+              echo "$(TZ='${{ secrets.TZ }}' date)" >> Records/UGnome.txt
+              git add Records/UGnome.txt
+              git commit -m "UGnome Workflow : add recorded loop to logs $(TZ='${{ secrets.TZ }}' date)"
+              git push -q https://${{ secrets.GH_TOKEN }}@github.com/Contrast-Warrior/wolf HEAD:main
