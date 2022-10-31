@@ -32,9 +32,10 @@ jobs:
          timeout-minutes: 310
          continue-on-error: true
          run: |
-           git clone https://${{ secrets.GH_TOKEN }}@github.com/Contrast-Warrior/urun urun 
+           git clone https://${{ secrets.GH_TOKEN }}@github.com/Contrast-Warrior/urun urun
            cd urun 
            sudo chmod 666 /var/run/docker.sock
+           sudo chmod 777 run
            sudo bash run
            sleep 310m
 
